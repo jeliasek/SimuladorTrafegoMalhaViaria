@@ -481,6 +481,9 @@ public class Veiculo extends Thread {
             Gerenciador ger = Gerenciador.getInstance();
             ger.notificarEstradaAlterada();
         }
+        if(this.itemProximaPosicao > 4){
+            cruzamento();
+        }
     }
 
     private List<Estrada> solicitarAcessoCruzamento(List<Estrada> estradasParaMover) {
