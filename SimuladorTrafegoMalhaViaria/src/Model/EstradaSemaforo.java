@@ -14,7 +14,8 @@ import javax.swing.ImageIcon;
  *
  * @author Joao
  */
-public class EstradaSemaforo extends Estrada  {
+public class EstradaSemaforo extends Estrada {
+
     private String imagemBase;
     private int linha;
     private int coluna;
@@ -23,10 +24,8 @@ public class EstradaSemaforo extends Estrada  {
     private Veiculo veiculo;
     private ImageIcon imagem;
     private Semaphore mutex;
-    private Semaphore ocupado;
-    private Semaphore livre;
 
-    public EstradaSemaforo(int linha, int coluna, int item,Veiculo veiculo, boolean ehCruzamento, String imagem) {
+    public EstradaSemaforo(int linha, int coluna, int item, Veiculo veiculo, boolean ehCruzamento, String imagem) {
         this.linha = linha;
         this.coluna = coluna;
         this.item = item;
@@ -34,98 +33,112 @@ public class EstradaSemaforo extends Estrada  {
         this.imagem = new ImageIcon(imagem);
         this.imagemBase = imagem;
         mutex = new Semaphore(1);
-        livre = new Semaphore(1);
-        ocupado = new Semaphore(0);
+
     }
 
     @Override
     public boolean addVeiculoEstrada(Veiculo veiculo) {
-        boolean adicionou  = false;
-        try {            
-            livre.acquire();
+        boolean adicionou = false;
+        try {
+
             mutex.acquire();
-            this.imagem = new ImageIcon("assets/veiculo.png");          
-            veiculo.setColuna(this.coluna);
-            veiculo.setLinha(this.linha);
-            veiculo.setItemPosicao(this.item);
-            this.veiculo = veiculo;
-            adicionou = true;           
+            if (veiculo != null) {
+                if (!estaOcupado()) {
+                    if (veiculo.isVivo()) {
+                        this.imagem = new ImageIcon("assets/veiculo.png");
+                        veiculo.setColuna(this.coluna);
+                        veiculo.setLinha(this.linha);
+                        veiculo.setItemPosicao(this.item);
+                        this.veiculo = veiculo;
+                        adicionou = true;
+                    } else {
+                        veiculo.interrupt();
+                    }
+                }
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             mutex.release();
-            ocupado.release();
+
         }
         return adicionou;
     }
-    
+
     @Override
     public boolean addVeiculoCruzamento(Veiculo veiculo) {
-        boolean adicionou  = false;
+        boolean adicionou = false;
         try {
             mutex.acquire();
-            this.imagem = new ImageIcon("assets/veiculoCruzamento.png");
-            veiculo.setColuna(this.coluna);
-            veiculo.setLinha(this.linha);
-            veiculo.setItemPosicao(this.item);
-            this.veiculo = veiculo;
-            adicionou = true;           
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            mutex.release();
-            ocupado.release();
-        }
-        return adicionou;
-    }
-    
-    @Override
-    public boolean gerarVeiculoEstrada(Veiculo veiculo){
-        boolean adicionou  = false;        
-            try {
-                livre.acquire();
-                mutex.acquire();
-                if (!estaOcupado()) {
-                    this.imagem = new ImageIcon("assets/veiculo.png");
+            if (veiculo != null) {
+                if (veiculo.isVivo()) {
+                    this.imagem = new ImageIcon("assets/veiculoCruzamento.png");
                     veiculo.setColuna(this.coluna);
                     veiculo.setLinha(this.linha);
                     veiculo.setItemPosicao(this.item);
                     this.veiculo = veiculo;
                     adicionou = true;
-            }else{
-                   Thread.sleep(200);
-                }          
+                } else {
+                    veiculo.interrupt();
+                    mutex.release();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            mutex.release();
+
+        }
+        return adicionou;
+    }
+
+    @Override
+    public boolean gerarVeiculoEstrada(Veiculo veiculo) {
+        boolean adicionou = false;
+        try {
+
+            mutex.acquire();
+            if (!estaOcupado()) {
+                this.imagem = new ImageIcon("assets/veiculo.png");
+                veiculo.setColuna(this.coluna);
+                veiculo.setLinha(this.linha);
+                veiculo.setItemPosicao(this.item);
+                this.veiculo = veiculo;
+                adicionou = true;
+            } else {
+                Thread.sleep(200);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             mutex.release();
-            ocupado.release();
+
         }
-            return adicionou;
-        }
+        return adicionou;
+    }
 
     @Override
     public Veiculo retirarVeiculoEstrada() {
         Veiculo aux = null;
         try {
-            ocupado.acquire();
+
             mutex.acquire();
             aux = veiculo;
             this.veiculo = null;
             this.imagem = new ImageIcon(imagemBase);
         } catch (InterruptedException e) {
-            System.out.println("Semaforo mutex ou livre interrompidos, abortado");
+            System.out.println("Semaforo mutex interrompidos, abortado");
             e.printStackTrace();
             return null;
         } finally {
             mutex.release();
-            livre.release();
+
         }
         return aux;
     }
 
     @Override
-    public  int getLinha(){
+    public int getLinha() {
         return linha;
     }
 
@@ -173,25 +186,23 @@ public class EstradaSemaforo extends Estrada  {
     public void setImagemBase(String imagemBase) {
         this.imagemBase = imagemBase;
     }
-    
 
     @Override
     public String toString() {
         return "L=" + linha + "C=" + coluna + "Ca=" + veiculo + "I=" + item;
     }
-    
+
     @Override
-    public boolean reservar(){
-        try {
-            return livre.tryAcquire(500, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(EstradaSemaforo.class.getName()).log(Level.SEVERE, null, ex);
+    public boolean reservar() {
+        if (!estaOcupado()) {
+            this.veiculo = new Veiculo(linha, coluna, item, linha, coluna, linha);
+            return true;
         }
-        return false; //Caso seja interrempido       
+        return false;
     }
+
     @Override
-    public void liberar(){
-        livre.release();
+    public void liberar() {
+        veiculo = null;
     }
 }
-

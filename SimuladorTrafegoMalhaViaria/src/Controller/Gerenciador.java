@@ -92,7 +92,7 @@ public class Gerenciador {
     
     public void encerrarSimulacaoImediatamente(){
         emAndamento = false;
-        
+        matriz.setMatriz(null);
         lerMatriz(modo);
         notificarEstradaAlterada();
         for (Observer.Observer obs : observadores) {

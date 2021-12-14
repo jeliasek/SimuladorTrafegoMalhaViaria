@@ -26,13 +26,13 @@ public class CriadorDeVeiculos implements Buffer {
     private Random rand;
 
     private Semaphore mutex;
-    private Semaphore cheio;
-    private Semaphore livre;
+
+
 
     public CriadorDeVeiculos(int capacidade) {
         this.veiculos = new Veiculo[capacidade];
-        cheio = new Semaphore(0);
-        livre = new Semaphore(capacidade);
+        
+        
         mutex = new Semaphore(1);
         quantidade = 0;
         inicio = 0;
@@ -44,7 +44,7 @@ public class CriadorDeVeiculos implements Buffer {
     @Override
     public void addVeiculo(Veiculo veiculo) throws Exception {
         try {
-            livre.acquire();
+            
             mutex.acquire();
             if (quantidade == veiculos.length) {
                 throw new Exception("Buffer cheio");
@@ -58,7 +58,7 @@ public class CriadorDeVeiculos implements Buffer {
             e.printStackTrace();
         } finally {
             mutex.release();
-            cheio.release();
+            
         }
     }
 
@@ -66,7 +66,7 @@ public class CriadorDeVeiculos implements Buffer {
     public Veiculo removerVeiculo() throws Exception {
         Veiculo veiculo = null;
         try {
-            cheio.acquire();
+            
             mutex.acquire();
             if (quantidade == 0) {
                 throw new Exception("Buffer vazio");
@@ -81,7 +81,7 @@ public class CriadorDeVeiculos implements Buffer {
             return null;
         } finally {
             mutex.release();
-            livre.release();
+            
         }
         return veiculo;
     }

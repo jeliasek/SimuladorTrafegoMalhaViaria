@@ -24,7 +24,6 @@ public class Veiculo extends Thread {
     private int itemPosicao; //Seu valor numerico referente a malha
     private int itemProximaPosicao; //Valor numerico referente ao proximo item da malha
     private double velocidade;
-    private String nome;
     private Matriz matriz;
     private boolean gerou;
     private CriadorDeVeiculos cdc;
@@ -47,9 +46,17 @@ public class Veiculo extends Thread {
         caminho = new ArrayList<>();
 
     }
+
+    public boolean isVivo() {
+        return vivo;
+    }
+
+    public void setVivo(boolean vivo) {
+        this.vivo = vivo;
+    }
     
    
-
+    
     @Override
     public void run() {
         while (vivo) {
@@ -66,6 +73,7 @@ public class Veiculo extends Thread {
             Gerenciador ger = Gerenciador.getInstance();
             ger.notificarEstradaAlterada();
         }
+        
     }
 
     public int getLinha() {
@@ -94,10 +102,6 @@ public class Veiculo extends Thread {
 
     public double getVelocidade() {
         return velocidade;
-    }
-
-    public String getNome() {
-        return nome;
     }
 
     public void setVelocidade(double velocidade) {
@@ -173,7 +177,6 @@ public class Veiculo extends Thread {
                     } else {
 //                        System.out.println("Tipo de Estrada: " + verificaTipoEstrada());
 //                        if(verificaTipoEstrada() == 1){
-System.out.println(itemPosicao +" - "+ itemProximaPosicao);
                             cruzamento();
 //                        }else{
 //                            cruzamentoViaDupla();
@@ -188,7 +191,7 @@ System.out.println(itemPosicao +" - "+ itemProximaPosicao);
                     if (matriz.getValorMatriz(linha, coluna + 1).getItem() <= 4 && !matriz.getValorMatriz(linha, coluna + 1).estaOcupado()) {
                         matriz.getValorMatriz(linha, coluna + 1).addVeiculoEstrada(matriz.getValorMatriz(linha, coluna).retirarVeiculoEstrada());
                     } else {
-                        System.out.println(itemPosicao +" - "+ itemProximaPosicao);
+                        
                         cruzamento();
                     }
                 }
@@ -199,7 +202,7 @@ System.out.println(itemPosicao +" - "+ itemProximaPosicao);
                     if (matriz.getValorMatriz(linha + 1, coluna).getItem() <= 4 && !matriz.getValorMatriz(linha + 1, coluna).estaOcupado()) {
                         matriz.getValorMatriz(linha + 1, coluna).addVeiculoEstrada(matriz.getValorMatriz(linha, coluna).retirarVeiculoEstrada());
                     } else {
-                        System.out.println(itemPosicao +" - "+ itemProximaPosicao);
+                        
                         cruzamento();
                     }
                 }
@@ -210,7 +213,7 @@ System.out.println(itemPosicao +" - "+ itemProximaPosicao);
                     if (matriz.getValorMatriz(linha, coluna - 1).getItem() <= 4 && !matriz.getValorMatriz(linha, coluna - 1).estaOcupado()) {
                         matriz.getValorMatriz(linha, coluna - 1).addVeiculoEstrada(matriz.getValorMatriz(linha, coluna).retirarVeiculoEstrada());
                     } else {
-                        System.out.println(itemPosicao +" - "+ itemProximaPosicao);
+                        
                         cruzamento();
                     }
                 }

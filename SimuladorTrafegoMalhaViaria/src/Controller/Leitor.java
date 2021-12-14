@@ -56,7 +56,9 @@ public class Leitor {
                     } catch (Exception e) {
 
                     }
+                    matriz.getValorMatriz(i, j).liberar();
                 }
+                
             }
     }
 }
